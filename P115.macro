@@ -1,0 +1,15 @@
+(debug,#<_call_level>: Clear Tool Rack)
+o50 if [EXISTS[#<_scnc_config>]]
+o50 else
+    G65P100
+    G65P101
+o50 endif
+
+#<_index>=0
+o60 WHILE [#<_index> LT #<_scnc_rack_slots>]
+    (debug,Clearing Slot #<_index>/#<_scnc_rack_slots>)
+    G65P112Q[#<_index>]R-1
+    #<_index> = [#<_index> + 1]
+o60 ENDWHILE
+
+(PRINT, Tool rack slots set to empty!)

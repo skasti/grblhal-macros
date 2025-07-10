@@ -1,0 +1,45 @@
+(debug,Store tool info)
+o50 if [EXISTS[#<_scnc_info_start>]]
+o50 else
+    G65P100
+    G65P101
+o50 endif
+
+#<tool>=#20
+#<type>=#17
+#<diameter>=#7
+#<custom>=#8
+#<length>=#9
+(debug,T#<tool> Q#<type> D#<diameter> E#<custom> F#<length>)
+; First, check if type info is already stored somewhere, and return if it is.
+G65P202Q#<tool>
+O59 if [#<_tool_desc> NE 999]
+        (DEBUG,Tool info already stored: #<_tool_desc> &[#<_tool_desc>])
+O59 return
+O59 endif
+
+; Start by incementing the index
+#<_scnc_info_index>=[#<_scnc_info_index>+1]
+(debug,Info-index: #<_scnc_info_index>)
+; Then calculate the starting param for the tool info
+#<info_offset>=[#<_scnc_info_index>*#<_scnc_info_size>]
+#<info_start>=[#<_scnc_info_start>+#<info_offset>]
+(debug,Info-start: #<info_start>)
+#<_scnc_desc_index>=[#<_scnc_desc_index>+1]
+(debug,Description-index: #<_scnc_desc_index>)
+#<desc_register>=[#<_scnc_desc_start>+#<_scnc_desc_index>]
+(debug,Description-register: #<desc_register>)
+G65P3I[#<info_start>]Q[#<tool>]
+G65P3I[#<info_start>+1]Q[#<type>]
+G65P3I[#<info_start>+2]Q[#<diameter>]
+G65P3I[#<info_start>+3]Q[#<length>]
+G65P3I[#<info_start>+4]Q[#<custom>]
+G65P3I[#<info_start>+5]Q[#<desc_register>]
+
+(&[#<desc_register>]=T#<tool>: L#<length> D#<diameter>)
+O60 if [#<custom> NE 0]
+    (&[#<desc_register>]=&[#<desc_register>] &[#<_scnc_customtype>+#<type>]#<custom> &[#<type>])
+O60 else
+    (&[#<desc_register>]=&[#<desc_register>] &[#<type>])
+O60 endif
+#<_tool_desc>=#<desc_register>

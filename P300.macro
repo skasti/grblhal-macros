@@ -1,0 +1,26 @@
+(debug,#<_call_level>: Grabbing Tool v0.3)
+o50 if [EXISTS[#<_scnc_config>]]
+o50 else
+    G65P100
+    G65P101
+o50 endif
+
+G4 P0.1
+M64P0
+G4P0.5
+M65P0
+
+G53 G1 Z[#<_scnc_rack_z>] F[#<_scnc_move_feed>]
+M3 S1500
+G91
+G1 Z-5 F800
+G4 P0.25
+G1 Z5 F1500
+G1 Z-4 F1500
+G1 Z4 F1500
+M5
+G4 P0.4
+Z50 F5000
+G90
+G53 G1 Z[#<_scnc_rack_clear>] F[#<_scnc_move_feed>]
+M99

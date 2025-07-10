@@ -1,0 +1,71 @@
+(debug,#<_call_level>: Pick up selected tool v0.5)
+o50 if [EXISTS[#<_scnc_config>]]
+o50 else
+    G65P100
+    G65P101
+o50 endif
+
+#<Q>=#17
+
+O55 if [#<_selected_tool> LT 0]
+        (PRINT,New tool not selected! Aborting!)
+        M1; Wait for user to continue
+        M99
+O55 endif
+
+G65 P202 Q[#<_selected_tool>]
+
+O59 if [#<_atc_enabled> EQ 0]
+        (debug,ATC disabled)
+        #<_pickupSlot> = -1
+O59 else
+        G65 P111 R[#<_selected_tool>]
+        (debug,#<_call_level>: P111 Returned: #<_value_returned>/#<_value>)
+O59 endif
+
+O60 if [#<_pickupSlot> LT 0]
+        (debug,#<_call_level>: Manual)
+        G53 G0 Z[#<_scnc_clear_height>]
+        G53 G0 X[#<_scnc_manual_x>] Y[#<_scnc_manual_y>]
+        G53 G0 Z[#<_scnc_manual_z>]
+        (PRINT,Please load &[#<_tool_desc>] manually)
+        M1; Wait for operator to cycle start
+O60 else
+        (debug,#<_call_level>: Auto)
+        G53 G0 Z[#<_scnc_clear_height>]
+        G4 P0.1
+        G65 P120 S[#<_pickupSlot>]
+        G4 P0.1
+        G65 P300
+O60 endif
+
+G4 P0.1
+; Carry Q in case it was specified when calling this macro
+#<_tool_present>=0
+(debug,Q=#<Q>)
+G65 P302 Q[#<Q>]
+G4 P0.1
+
+O70 if  [#<_tool_present> EQ 1]
+        (debug,#<_call_level>: Tool loaded #<_selected_tool>)
+        M61 Q[#<_selected_tool>]
+O70 else
+        (debug,#<_call_level>: Tool not present after auto load, switching to manual)
+        G53 G0 Z[#<_scnc_clear_height>]
+        G53 G0 X[#<_scnc_manual_x>] Y[#<_scnc_manual_y>]
+        G53 G0 Z[#<_scnc_manual_z>]
+        (PRINT,Tool not present after loading. Please load &[#<_tool_desc>] manually)
+        M1; Wait for operator to cycle start
+        ; Re-check tool presence
+        #<_tool_present>=0
+        G65 P302 Q[#<Q>]
+        G4 P0.1
+        O71 if [#<_tool_present> EQ 1]
+            (debug,#<_call_level>: Tool loaded manually #<_selected_tool>)
+            M61 Q[#<_selected_tool>]
+        O71 else
+            (debug,#<_call_level>: Tool still not present after manual load)
+            (PRINT,Tool still not present after manual loading. Abort current operation!)
+            M1; Wait for operator to abort
+        O71 endif
+O70 endif

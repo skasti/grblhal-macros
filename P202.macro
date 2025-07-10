@@ -1,0 +1,33 @@
+(debug,Load tool description for T#17)
+o50 if [EXISTS[#<_scnc_info_start>]]
+o50 else
+    G65P100
+    G65P101
+o50 endif
+
+#<tool>=#17
+
+O59 if [#<_scnc_info_index> LT 0]
+(debug,no info loaded, setting string register 999: "T#<tool>: unknown")
+(&999=T#<tool>: unknown)
+#<_tool_desc>=999
+O59 return #<_tool_desc>
+O59 endif
+
+#<index>=0
+O60 while [#<index> LE #<_scnc_info_index>]
+    #<info_offset>=[#<index>*#<_scnc_info_size>]
+    G65P3I[#<_scnc_info_start>+#<info_offset>]
+    (debug,Info #<index> @ #<info_offset>: #<_value>)
+O61 if [#<_value> EQ #<tool>]
+        G65P3I[#<_scnc_info_start>+#<info_offset>+5]
+        #<_tool_desc>=#<_value>
+        (debug,Found tool description register for #<tool>: #<_tool_desc> = "&[#<_tool_desc>]")
+O61     return #<_tool_desc>
+O61 endif
+    #<index>=[#<index>+1]
+O60 endwhile
+(debug,Did not find tool info, setting string register 999: "T#<tool>: unknown")
+(&999=T#<tool>: unknown)
+#<_tool_desc>=999
+O60 return #<_tool_desc>

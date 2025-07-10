@@ -1,0 +1,60 @@
+(debug,#<_call_level>: Park current tool v0.2)
+o50 if [EXISTS[#<_scnc_config>]]
+o50 else
+    G65P100
+    G65P101
+o50 endif
+
+#<Q>=#17
+
+O59 if [#<_atc_enabled> EQ 0]
+        (debug,ATC disabled)
+        #<_parkSlot> = -1
+O59 else
+        G65 P110 R[#<_current_tool>] Q1
+        (debug,#<_call_level>: P110 Returned: #<_value_returned>/#<_value>)
+O59 endif
+
+O60 if [#<_parkSlot> LT 0]
+        (debug,#<_call_level>: Manual)
+        G53 G0 Z[#<_scnc_clear_height>]
+        G53 G0 X[#<_scnc_manual_x>] Y[#<_scnc_manual_y>]
+        G53 G0 Z[#<_scnc_manual_z>]
+        (PRINT,T#<_current_tool> does not have a slot in the rack. Please unload manually)
+        M1; Wait for operator to cycle start
+O60 else
+        (debug,#<_call_level>: Auto)
+        G53 G0 Z[#<_scnc_clear_height>]
+        G4 P0.1
+        G65 P120 S[#<_parkSlot>]
+        G4 P0.1
+        G65 P301
+O60 endif
+
+G4 P0.1
+; Carry Q in case it was specified when calling this macro
+#<_tool_present>=1
+G65 P302 Q[#<Q>]
+(debug,#<_call_level>: P302 Returned: #<_value_returned>/#<_value>)
+O70 if [#<_tool_present> EQ 0]
+        (debug,#<_call_level>: Tool parked or unloaded)
+O70 else
+        G4 P0.1
+        (debug,#<_call_level>: Tool still present after auto park, switching to manual)
+        G53 G0 Z[#<_scnc_clear_height>]
+        G53 G0 X[#<_scnc_manual_x>] Y[#<_scnc_manual_y>]
+        G53 G0 Z[#<_scnc_manual_z>]
+        (PRINT,Tool still present after parking/unloading. Please unload manually and store in slot #<_parkSlot>)
+        M1; Wait for operator to cycle start
+        ; Re-check tool presence
+        #<_tool_present>=1
+        G65 P302 Q[#<Q>]
+        G4 P0.1
+        O71 if [#<_tool_present> EQ 0]
+            (debug,#<_call_level>: Tool now removed manually)
+        O71 else
+            (debug,#<_call_level>: Tool still present after manual unload)
+            (PRINT,Tool still present after manual unloading. Abort current operation!)
+            M1; Wait for operator to abort
+        O71 endif
+O70 endif

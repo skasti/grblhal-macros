@@ -1,0 +1,13 @@
+(PRINT,#<_call_level>: Tool Rack State)
+o51 if [EXISTS[#<_scnc_config>]]
+o51 else
+    G65P100
+    G65P101
+o51 endif
+
+#<_index>=0
+o60 WHILE [#<_index> LT #<_scnc_rack_slots>]
+    G65P3I[#<_index> + #<_scnc_rack_start>]
+    (PRINT,Slot #<_index>: #<_value>)
+    #<_index> = [#<_index> + 1]
+o60 ENDWHILE

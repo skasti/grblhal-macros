@@ -1,0 +1,40 @@
+(debug,#<_call_level>: SCNC Tool change v0.1)
+o50 if [EXISTS[#<_scnc_config>]]
+o50 else
+    G65P100
+    G65P101
+o50 endif
+
+#<_scnc_end_x>=#<_x>
+#<_scnc_end_y>=#<_y>
+#<_scnc_end_z>=#<_z>
+
+(debug,Selected Tool: #<_selected_tool>)
+
+O60 if [EXISTS[#<_scnc_tool_z>]]
+O60 else
+    ; Tool not probed yet. Probe current tool for reference
+    G4 P0.1
+    G65 P303 Q1 R1
+O60 endif
+
+; First, park the old tool
+G4 P0.1
+G65 P310 Q2
+; Then, load the new tool
+G4 P0.1
+G65 P311 Q2
+
+O70 if [#<_tool_present> EQ 1]
+    (debug,Next tool loaded)
+    ; Probe the new tool for length
+    G4 P0.1
+    G65 P303 Q1
+O70 else
+    (debug,Tool not loaded, move to manual loading position)
+    G53 G0 Z[#<_scnc_clear_height>]
+    G53 G0 X[#<_scnc_manual_x>] Y[#<_scnc_manual_y>]
+    G53 G0 Z[#<_scnc_manual_z>]
+    (PRINT,Tool not present after loading. Tool change not successful. Please abort!)
+    M1
+O70 endif

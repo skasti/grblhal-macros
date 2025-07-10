@@ -1,0 +1,9 @@
+(debug,#<_call_level>: Move to rack slot)
+o50 if [EXISTS[#<_scnc_config>]]
+o50 else
+    G65P100
+    G65P101
+o50 endif
+#<slot>=#19
+(debug,#<_call_level>: Slot: #<slot>)
+G53 G1 X[#<_scnc_rack_x>] Y[#<_scnc_rack_y> - #<_scnc_rack_spacing> * #<slot>] F[#<_scnc_move_feed>]

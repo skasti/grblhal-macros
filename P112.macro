@@ -1,0 +1,24 @@
+(debug,#<_call_level>: Set slot tool)
+o51 if [EXISTS[#<_scnc_config>]]
+o51 else
+    G65P100
+    G65P101
+o51 endif
+
+#<slot>=#17; Q
+#<tool>=#18; R
+
+(debug,Slot: #<slot>)
+(debug,Tool: #<tool>)
+
+o61 if [#<slot> LT 0]
+    (PRINT,Q must be > 0)
+    M0
+    M99
+o61 elseif [#<slot> GE #<_scnc_rack_slots>]
+    (PRINT,Q must be < _scnc_rack_slots)
+    M0
+    M99
+o61 endif
+
+G65P3I[#<slot> + #<_scnc_rack_start>]Q[#<tool>]

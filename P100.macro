@@ -1,0 +1,35 @@
+(debug, Loading SCNC Settings)
+(debug, Set the config parameter to 0 in case this fails part-way through)
+#<_scnc_config> = 0
+
+(debug, Global Configuration)
+#<_scnc_clear_height> = -10.0
+#<_scnc_move_feed> = 8000
+
+(debug, Manual Loading)
+#<_scnc_manual_x> = -165
+#<_scnc_manual_y> = -5
+#<_scnc_manual_z> = -20
+
+(debug, Tool Probing)
+#<_scnc_probe_x> = -333.0
+#<_scnc_probe_y> = -1.0
+#<_scnc_probe_z> = -100.0
+#<_scnc_probe_dist> = 99
+#<_scnc_probe_feed> = 1000
+#<_scnc_probe_count> = 3
+
+(debug, Rack position)
+#<_scnc_rack_x> = -2.6
+#<_scnc_rack_y> = -77.547
+#<_scnc_rack_z> = -165
+#<_scnc_rack_clear> = -80
+#<_atc_enabled> = 1
+
+(debug, Rack configuration)
+#<_scnc_rack_start> = 500
+#<_scnc_rack_slots> = 5
+#<_scnc_rack_spacing> = 37.5
+
+(debug, Set the config parameter to 1 so that macros can know if it is set up)
+#<_scnc_config> = 1

@@ -1,0 +1,68 @@
+(debug,#<_call_level>: Check if tool present V0.3)
+o50 if [EXISTS[#<_scnc_config>]]
+o50 else
+    G65P100
+    G65P101
+o50 endif
+
+#<end_x> = #<_x>
+#<end_y> = #<_y>
+#<end_z> = #<_z>
+#<Q> = #17
+(debug,Q=#<Q>)
+
+; If Q1, use _scnc_end_x,..._y,..._z as end-positions
+O60 if [#<Q> EQ 1]
+    O61 if [EXISTS[#<_scnc_end_x>]]
+        #<end_x> = #<_scnc_end_x>
+    O61 endif
+    O61 if [EXISTS[#<_scnc_end_y>]]
+        #<end_y> = #<_scnc_end_y>
+    O61 endif
+    O61 if [EXISTS[#<_scnc_end_z>]]
+        #<end_z> = #<_scnc_end_z>
+    O61 endif
+    (debug,X#<end_x> Y#<end_y> Z#<end_z>)
+O60 endif
+
+; Check if we need to move up to clearance height before moving to probe position
+#<needs_clearance>=1
+#<xDiff>=[ROUND[#<_abs_x>-#<_scnc_probe_x>]]
+#<yDiff>=[ROUND[#<_abs_y>-#<_scnc_probe_y>]]
+(debug,xDiff: #<xDiff> yDIff: #<yDiff>)
+O65 if [ABS[#<xDiff>] LE 0.1]
+O66     if [ABS[#<yDiff>] LE 0.1]
+            #<needs_clearance>=0
+O66     endif
+O65 endif
+
+
+O69 if [#<needs_clearance> EQ 1]
+        G53 G1 Z[#<_scnc_clear_height>] F[#<_scnc_move_feed>]
+O69 endif
+
+; Move to probing position
+G53 G1 X[#<_scnc_probe_x>] Y[#<_scnc_probe_y>] F[#<_scnc_move_feed>]
+G53 G1 Z[#<_scnc_probe_z>]
+
+; Air-burst to clear chips from probe
+G4 P0.1
+M64P0
+G4P0.3
+M65P0
+
+G91
+G38.3 Z[-#<_scnc_probe_dist>] F[#<_scnc_probe_feed>]
+G1 Z20 F[#<_scnc_move_feed>]
+G90
+
+; If Q2, we dont move after the test
+(debug,Q=#<Q>)
+O70 if [#<Q> NE 2]
+    G53 G1 Z[#<_scnc_clear_height>] F[#<_scnc_move_feed>]
+    G1 X[#<end_x>] Y[#<end_y>]
+    G1 Z[#<end_z>]
+O70 endif
+
+; #5070 is 1 or 0 depending on whether or not G38.3 or .5 was successfull
+#<_tool_present>=#5070

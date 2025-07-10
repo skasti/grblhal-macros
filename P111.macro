@@ -1,0 +1,21 @@
+(debug,#<_call_level>: Find pickup)
+o50 if [EXISTS[#<_scnc_config>]]
+o50 else
+    G65P100
+    G65P101
+o50 endif
+
+; read R, not T
+#<tool>=#18
+#<_index>=0
+#<_pickupSlot>=-1
+o60 WHILE [#<_index> LT #<_scnc_rack_slots>]
+    G65P3I[#<_index> + #<_scnc_rack_start>]
+    (debug,Slot #<_index>: #<_value> T:#<tool>)
+o61 if [#<_value> EQ #<tool>]
+        (debug,Returning #<_index>)
+        #<_pickupSlot>=#<_index>
+o60 return [#<_index>]
+o61 endif
+    #<_index> = [#<_index> + 1]
+o60 ENDWHILE

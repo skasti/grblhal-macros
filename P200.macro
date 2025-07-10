@@ -1,0 +1,49 @@
+(debug,Tool rack slot assignment v0.1)
+o50 if [EXISTS[#<_scnc_config>]]
+o50 else
+    G65P100
+    G65P101
+o50 endif
+#<_tool>=#20
+
+G65P201T[#<_tool>]Q[#17]D[#7]E[#8]F[#9]
+
+#<_uIndex>=[0]
+#<_uTool>=[0]
+o60 while [#<_uTool> NE 999]
+    #<_uParam> = [#<_uIndex> + #<_scnc_unrackable>]
+    G65P3I[#<_uParam>]
+    o61 if [#<_value_returned> EQ 1]
+        #<_uTool>=#<_value>
+    o61 else
+        ; We use 999 to mark end of the known tools, as relying on the next param to be empty is risky
+        #<_uTool>=[999]
+    o61 endif
+
+    ; if the tool is in the _uTool list, it should not be racked
+    o62 if [#<_uTool> EQ #<_tool>]
+        (PRINT,Tool &[#<_tool_desc>] can not be stored in tool rack. It will have to be manually loaded/unloaded)
+        M0
+        M99
+    o62 endif
+    #<_uIndex>=[#<_uIndex> + 1]
+o60 endwhile
+
+G65P111R[#<_tool>]
+o70 if [#<_pickupSlot> GE 0]
+    #<slot>=[#<_pickupSlot> + 1]
+    (PRINT,Tool T#<_tool> already stored in slot #<slot> from the back)
+    M99
+o70 endif
+
+G65P110R[#<_tool>]
+o80 if [#<_parkSlot> GE 0]
+    #<slot>=[#<_parkSlot> + 1]
+    (PRINT,Put tool &[#<_tool_desc>] in slot #<slot> from the back)
+    M0
+    G65P112Q[#<_parkSlot>]R[#<_tool>]
+o80 else
+    (PRINT,Unable to find slot for tool &[#<_tool_desc>]. It will have to be manually loaded/unloaded)
+    M0
+o80 endif
+M99
