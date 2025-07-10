@@ -52,6 +52,8 @@ To enable all features used by these macros, you may need the following forks:
 Each macro includes a debug/version line at the top for easy tracking.
 
 ## License
+This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) License. See the LICENSE file for details.
+
 These macros are provided as-is, without warranty. See individual files for copyright or license information if present.
 
 ---
